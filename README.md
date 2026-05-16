@@ -75,12 +75,6 @@ dotnet ef database update
 dotnet run
 ```
 
-После запуска приложение будет доступно по адресу:
-
-```text
-http://localhost:5206
-```
-
 ---
 
 # Тестовый IOC endpoint
@@ -94,7 +88,7 @@ http://localhost:5206/test-ioc
 ---
 
 # Docker
-
+https://hub.docker.com/repositories/saeqwesdfyuui
 ## Сборка контейнера
 
 ```bash
