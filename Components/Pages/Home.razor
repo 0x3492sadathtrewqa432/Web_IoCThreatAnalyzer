@@ -1,0 +1,91 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+@using IoCThreatAnalyzer.Parsers
+@using IoCThreatAnalyzer.Repositories
+@using IoCThreatAnalyzer.Models
+
+@inject HttpClient Http
+@inject IocParser Parser
+@inject IScanRepository ScanRepository
+
+<div style="padding:40px; font-family:Arial; max-width:1200px; margin:auto;">
+    <h1 style="color:#2563eb; font-size:42px;">IoC Threat Analyzer</h1>
+    <p style="font-size:18px; color:#666;">Web page scanning and cyber threat indicator detection system</p>
+
+    <div style="margin-top:30px; display:flex; gap:10px;">
+        <input @bind="TargetUrl" style="flex:1; height:45px; padding-left:15px; border-radius:10px; border:1px solid #ccc; font-size:16px;" />
+        <button @onclick="Analyze" style="width:150px; border:none; border-radius:10px; background:#2563eb; color:white; font-size:16px; font-weight:bold; cursor:pointer;">Analyze</button>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div style="margin-top:20px; color:red; font-weight:bold;">@ErrorMessage</div>
+    }
+
+    @if (Indicators.Any())
+    {
+        <div style="margin-top:30px; padding:20px; border-radius:12px; background:#fff4e5; border:2px solid #f59e0b;">
+            <h2 style="color:#b45309">Threat Detection Report</h2>
+            <p>Suspicious indicators detected.</p>
+            <p>Total indicators: <strong>@Indicators.Count</strong></p>
+            <p>Threat level: <strong style="color:red">HIGH</strong></p>
+        </div>
+
+        <table style="width:100%; margin-top:30px; border-collapse:collapse;">
+            <thead>
+                <tr style="background:#2563eb; color:white;">
+                    <th style="padding:12px">Type</th>
+                    <th style="padding:12px">Value</th>
+                    <th style="padding:12px">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Indicators)
+                {
+                    <tr style="border:1px solid #ddd">
+                        <td style="padding:12px; font-weight:bold;">@item.Type</td>
+                        <td style="padding:12px">@item.Value</td>
+                        <td style="padding:12px; color:red; font-weight:bold;">DETECTED</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private string TargetUrl = string.Empty;
+    private string ErrorMessage = string.Empty;
+    private List<IocItem> Indicators = new();
+
+    private async Task Analyze()
+    {
+        try
+        {
+            ErrorMessage = string.Empty;
+            Indicators.Clear();
+
+            var html = await Http.GetStringAsync(TargetUrl);
+            Indicators = Parser.Parse(html);
+
+            //  ИСПРАВЛЕНО: сохранение результата в БД
+            var scanResult = new ScanResult
+            {
+                Url = TargetUrl,
+                ScanDate = DateTime.UtcNow,
+                Indicators = Indicators.Select(i => new IocIndicator
+                {
+                    Type = i.Type,
+                    Value = i.Value
+                }).ToList()
+            };
+
+            await ScanRepository.AddAsync(scanResult);
+        }
+        catch
+        {
+            ErrorMessage = "Unable to analyze URL.";
+        }
+    }
+}
