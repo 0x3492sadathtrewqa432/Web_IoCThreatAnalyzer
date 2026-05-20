@@ -82,9 +82,9 @@ dotnet run
 Для тестирования используется локальная страница:
 
 ```text
-http://localhost:5206/test-ioc
+http://localhost:5206/report-malware
 ```
-
+** port используется в качестве примера и может меняться
 ---
 
 # Docker
