@@ -109,7 +109,7 @@ docker run -p 8080:8080 iocthreatanalyzer
 # Docker Compose
 
 ```bash
-docker-compose up --build
+docker-compose up
 ```
 
 ---
