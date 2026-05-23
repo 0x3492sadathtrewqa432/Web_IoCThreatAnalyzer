@@ -103,7 +103,7 @@ docker build -t iocthreatanalyzer .
 ```bash
 docker run -p 8080:8080 iocthreatanalyzer
 ```
-# Приложение запустится на 127.0.0.1:8080
+* Приложение запустится на 127.0.0.1:8080
 ---
 
 # Docker Compose
